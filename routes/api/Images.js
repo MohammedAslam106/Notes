@@ -10,7 +10,7 @@ const verifyJwt = require('../../MidleWare/Authorization')
 
 const storage=multer.diskStorage({
     destination:(req,file,cb)=>{
-        cb(null,'uploads/')
+        cb(null,__dirname)
     },
     filename:(req,file,cb)=>{
         cb(null,Date.now() + path.extname(file.originalname)  )
