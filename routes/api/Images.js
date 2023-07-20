@@ -8,32 +8,36 @@ const verifyJwt = require('../../MidleWare/Authorization')
 
 
 
-const storage=multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,__dirname)
-    },
-    filename:(req,file,cb)=>{
-        cb(null,Date.now() + path.extname(file.originalname)  )
-    }
-})
+// const storage=multer.diskStorage({
+//     destination:(req,file,cb)=>{
+//         cb(null, path.join(__dirname, '../../uploads'));
+//     },
+//     filename:(req,file,cb)=>{
+//         cb(null,Date.now() + path.extname(file.originalname) )
+//     }
+// })
 
+const storage=multer.memoryStorage()
 
 const upload=multer({storage:storage})
 
 routes.post('/',verifyJwt,upload.single('image'),async(req,res)=>{
-    console.log(req.body)
+    console.log(req.file)
+    console.log(req.files)
+    console.log(req.file.buffer.toString('base64')) //--->Do this if possible
     try{
         // console.log(fs.readFileSync(path.join('uploads/' + req.file.filename)))
         await Images.deleteMany({user:req.user._id})
         const obj = {
             img: {
-                data: fs.readFileSync(path.join( 'uploads/' + req.file.filename)),
-                contentType: 'image/png'
+                data:req.file.buffer,
+                contentType: req.file.mimetype
             },
             user:req.user._id
         }
         const response=await Images.create(obj)
         res.json({message:response})
+        console.log(response)
         
     }catch(error){
         res.status(403).json({error:error})
